@@ -1,16 +1,15 @@
-/* (1) filename          */
-/* (2) last name, first name */
+/* (1) minishell.c          */
+/* (2) Patel Aryan ( 201901021 ) */
 
 /* (3) appropriate includes */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
-// #include <sys/wait.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <signal.h>
 
-char *argv[16];
 pid_t pid; // global variable for the child process ID
 
 int main()
@@ -64,93 +63,40 @@ int main()
 
     /* (6) Handle the case where something OTHER than "mmame" */
     /*     was entered on the minishell command line:         */
-    if (num_tokens == 1)
-    {
-      // char *myinp = tokens[i];
-      //printf("%s\n",tokens[0]);
-
-      // char buf[10];
-
-      // while (read(0, buf, sizeof(buf)) > 0)
-      // {
-      //   // read() here read from stdin charachter by character
-      //   // the buf[0] contains the character got by read()
-      //   printf("%s ",buf);
-      //   buf.free();
-      // }
-
-      char *ptr;
-      i = 0;
-      ptr = strtok(tokens[0], " ");
-      while (ptr != NULL)
-      {
-        //printf("%s\n", ptr);
-        argv[i] = ptr;
-        i++;
-        ptr = strtok(NULL, " ");
-      }
-
-      // // check for "&"
-      if (!strcmp("&", argv[i - 1]))
-      {
-        argv[i - 1] = NULL;
-        argv[i] = "&";
-      }
-      else
-      {
-        argv[i] = NULL;
-      }
-
-      pid = fork();
-      if (-1 == pid)
-      {
-        printf("failed to create a child\n");
-      }
-      else if (0 == pid)
-      {
-        //printf("hello from child\n");
-        char destination[] = "/home/aryan/Downloads/OSlab-main/";
-        strcat(destination, tokens[0]);
-        // execute a command
-        execl(destination, destination, NULL);
-        printf("minishell : %s : command not found\n", tokens[0]);
-        continue;
-      }
-      else
-      {
-        //printf("hello from parent\n");
-        // wait for the command to finish if "&" is not present
-        if (NULL == argv[i])
-          waitpid(pid, NULL, 0);
-        continue;
-      }
-      continue;
-    }
 
     /* (7) Something valid entered on the command line, gotta fork */
 
+    pid = fork();
+
     /* (8) Handle the case where the fork failed: */
-    if (-1 == -1)
+    if (-1 == pid)
     {
+      printf("Process Failed ..,\n");
       exit(1);
     }
 
     /* (9) Code that the parent executes: */
-    if (0 != 0)
+    else if (0 != pid)
     {
-      int status;
-      // parent waits for child (mmame) to terminate
+      //printf("hello from parent\n");
+      // wait for the command to finish if "&" is not present
+      waitpid(pid, NULL, 0);
     }
 
     /* (10) Code that the child executes: */
     else
     {
-      /* (11) The child must handle these cases: */
-      /*      Part 1: mmame                      */
-      /*      Part 2: mmame   filename           */
-      /*      Part 3: mmame < filename           */
-      /*      Part 4: mmame > filename           */
+      /*      Part 1: mmame     */
+      char buff[FILENAME_MAX]; //create string buffer to hold path
+      getcwd(buff, FILENAME_MAX);
+
+      strcat(buff, "/");
+      strcat(buff, tokens[0]);
+
+      execl(buff, buff, NULL);
+      printf("minishell : %s : command not found\n", tokens[0]);
     }
+    continue;
   }
   return 0;
 }
